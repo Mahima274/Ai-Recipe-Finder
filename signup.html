@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Signup</title>
+</head>
+<body>
+    <div class="container">
+        <div class="signup-box">
+            <h2>Signup</h2>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="{{ url_for('signup') }}" onsubmit="return validateForm();"> 
+                <div>
+                    <input type="text" id="name" name="name" placeholder="Full Name" required pattern="^[A-Za-z]+(?:\s[A-Za-z]+)*$" title="Name must contain only letters and spaces between words.">
+                </div>
+                <div>
+                    <input type="date" id="dob" name="dob" placeholder="Date of Birth" required>
+                </div>
+                <div>
+                    <input type="text" id="phone" name="phone" placeholder="Phone Number" required pattern="\d{10}" title="Phone number must be exactly 10 digits.">
+                </div>
+                <div>
+                    <input type="email" id="email" name="email" placeholder="Email Address" required>
+                </div>
+                <div class="password-container">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <i class="fa fa-eye" id="togglePassword"></i>
+                </div>
+                <div class="password-container">
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                    <i class="fa fa-eye" id="toggleConfirmPassword"></i>
+                </div>
+                <p>Password must be at least 8 characters long, include one uppercase letter, and one special symbol.</p>
+                <button type="submit">Signup</button> <br>
+                <p class="error-message" style="color: red;">{% if 'Email already registered. Please login.' in get_flashed_messages() %}Email already registered. Please login.{% endif %}</p>
+                <p class="success-message" style="color: green;">{% if 'Signup successful! Please login.' in get_flashed_messages() %}Signup successful! Please login.{% endif %}</p>
+                <p class="info-message" style="color: blue;">{% if 'Please fill out the form.' in get_flashed_messages() %}Please fill out the form to create an account.{% endif %}</p>
+            </form>
+            <p class="login">
+                Already have an account? <a href="{{ url_for('login') }}">Login</a>
+            </p>
+        </div>
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordField = document.getElementById("password");
+        
+        togglePassword.addEventListener("click", function() {
+            const type = passwordField.type === "password" ? "text" : "password";
+            passwordField.type = type;
+            this.classList.toggle("fa-eye-slash");
+        });
+        
+        const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
+        const confirmPasswordField = document.getElementById("confirm_password");
+        
+        toggleConfirmPassword.addEventListener("click", function() {
+            const type = confirmPasswordField.type === "password" ? "text" : "password";
+            confirmPasswordField.type = type;
+            this.classList.toggle("fa-eye-slash");
+        });
+    });
+
+    function validateForm() {
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirm_password").value;
+        
+        // Check password requirements first
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*]/.test(password);
+        const hasMinLength = password.length >= 8;
+
+        if (!hasMinLength || !hasUpperCase || !hasSpecialChar) {
+            alert("Password must be at least 8 characters long, include one uppercase letter, and one special symbol (!@#$%^&*)");
+            return false;
+        }
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return false;
+        }
+
+        return true;
+    }
+    </script>
+    <style>
+    .password-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .password-container input {
+        width: 100%;
+        padding-right: 30px;
+    }
+    .password-container i {
+        position: absolute;
+        right: 10px;
+        cursor: pointer;
+    }
+    </style>
+</body>
+</html>

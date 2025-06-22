@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column; /* Stack header and content */
+            background: url('{{ url_for('static', filename='images/login.png') }}') no-repeat center center fixed;
+            background-size: cover;
+            color:black;
+            font-weight: bold;
+        }
+
+        /* Header */
+        header {
+            background-color: #2c3e4c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            color: white;
+            width: 100%;
+            position: fixed;
+            top: 0; /* Explicitly position at the top */
+            z-index: 100;
+        }
+        .header-content {
+            display: grid;
+            grid-template-columns: 1fr auto; /* 1fr for logo, auto for buttons */
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            justify-self: end; /* Align buttons to the right */
+        }
+
+        .notification-button,
+        .profile-button {
+            background: none;
+            border: none;
+            color:white;
+            padding: 1px 5px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background-color 0.2s ease;
+        }
+
+        .notification-button:hover,
+        .profile-button:hover {
+            background-color: rgba(72, 69, 61, 0.2);
+        }
+        .toggle-button {
+            background: none;
+            border: none;
+            padding: -20px; /* Adjust padding as needed */
+            cursor: pointer;
+            display: flex;
+            flex-direction: column; /* Stack bars vertically */
+            gap: 5px; /* Space between bars */
+            transition: opacity 0.2s ease; /* Smooth transition for hover effect */
+            font-size: 1.5em; /* Adjust size for Unicode method */
+            align-items: center; /* Center the bars horizontally */
+            transform: translateY(-10px);
+          }
+          
+          .toggle-button:hover {
+            opacity: 0.7; /* Example hover effect */
+          }
+          
+          .bar { /* Only for the HTML elements method */
+            width: 8px; /* Adjust bar width */
+            height: 3px; /* Adjust bar height */
+            background-color: white; /* Bar color */
+           
+          }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e4c;
+            color: white;
+            position: fixed;
+            top: 3;
+            left: 0;
+            height: 100%;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 99;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .sidebar li a {
+            display: block;
+            padding: 15px 15px;
+            text-decoration: none;
+            color: white;
+            transition: background-color 0.2s ease;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar li a:hover {
+            background-color: rgba(75, 87, 76, 0.51);
+            color: #ddd;
+        }
+
+        .sidebar li a i { /* Icon styling */
+            margin-right: 10px;
+            width: 1.2em;
+            text-align: center;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: white;
+            background: none;
+            border: none;
+        }
+        /* Main Content */
+        .main-content {
+            padding: 10px;
+            flex: 1;
+            margin-top: 10px; /* Adjusted to account for header height */
+            display: flex;
+            justify-content: center; /* Center the form */
+            align-items: center; /* Center the form vertically */
+        }
+        .profile-container {
+            background-color: rgba(244, 241, 241, 0.9);
+            border-radius: 5px;
+            padding: 5px;
+            width: 500px;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.76);
+        }
+        h1 {
+            font-size : 2em;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #2c3e4c;
+        }
+
+        /* Flash message styles */
+        .flash-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            color: white;
+        }
+        .flash-success {
+            background-color: green;
+        }
+        .flash-error {
+            background-color: red;
+        }
+        
+        label {
+            display: block;
+            margin: 4px 0;
+        }
+
+        /* Input Fields */
+        form input,
+        form select,
+        form textarea {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #0c0c0c;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .submit-btn {
+            background-color: #2c3e4c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <span class="toggle-button" onclick="toggleSidebar()">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </span>
+            <div class="logo">Recipe Finder</div>
+
+            <div class="header-actions">
+                <span class="notification-icon" onclick="window.location.href='{{ url_for("notification") }}'">
+                    <i class="fas fa-bell"></i>
+                </span>
+                    <button class="profile-button" onclick="window.location.href='{{ url_for("profile") }}'">
+                        <i class="fas fa-user"></i> Profile
+                    </button>
+            </div>
+        </div>
+    </header>
+    <aside class="sidebar">
+        <ul>
+            <li><a href="/home"><i class="fas fa-paper-plane"></i> Home</a></li>
+            <li><a href="/recipe"><i class="fas fa-utensils"></i> Recipe</a></li>
+            <li><a href="/category"><i class="fas fa-list"></i> Category</a></li>
+            <li><a href="/feedback"><i class="fas fa-file-alt"></i> Feedback</a></li>
+            <li><a href="/view_saved"><i class="fas fa-history"></i> Saved Pages</a></li>  
+            <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+            <li><a href="/help"><i class="fas fa-question-circle"></i> Help/FAQ</a></li>
+            <li><a href="/contact_support"><i class="fas fa-headset"></i> Contact Support</a></li> 
+            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </aside>
+    
+
+    <div class="main-content">
+        <div class="profile-container">
+            <h1>Profile</h1>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <form method="POST">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" value="{{ user.name }}" required>
+
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob" value="{{ user.dob }}" required>
+
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ user.email }}" required>
+
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" value="{{ user.phone }}" required>
+
+                <label for="password">New Password (leave blank to keep current)</label>
+                <input type="password" id="password" name="password">
+
+                <button type="submit" class="submit-btn">Update Profile</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('show');
+    }
+</script>
+</body>
+</html>
